@@ -1,28 +1,41 @@
 const model_game = require('../models/model_game');
 
-exports.createGame = (req, res) => {
+const util_generateGame = require('../utils/util_generateGame');
 
-    const difficulty = req.body.difficulty;
 
-    model_game.createGame(); // ADD DATA PARAMS LATER
+function createGame(req, res) {
+
+    //const difficulty = req.body.difficulty;
+
+    const game = util_generateGame.generateGame();
+
+    model_game.createGame(game); // ADD DATA PARAMS LATER
     
     res.status(201).json({ message: 'Game created successfully' });
 };
 
-exports.getGameById = (req, res) => {
+function getGameById (req, res) {
     const id = req.params.id;
     
     res.status(200).json({ message: 'Game fetched successfully' });
 };
 
-exports.updateGame = (req, res) => {
+function updateGame (req, res) {
     const id = req.params.id;    
 
     res.status(200).json({ message: 'Game updated successfully' });
 };
 
-exports.deleteGame = (req, res) => {
+function deleteGame (req, res) {
     const id = req.params.id;    
 
     res.status(204).json({ message: 'Game deleted successfully' });
+};
+
+// Export functions
+module.exports = {
+    createGame,
+    getGameById,
+    updateGame,
+    deleteGame
 };
