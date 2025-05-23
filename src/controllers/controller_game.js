@@ -11,7 +11,7 @@ function createGame(req, res) {
 
     model_game.createGame(game); // ADD DATA PARAMS LATER
     
-    res.status(201).json({ message: 'Game created successfully' });
+    res.status(201).json({ message: 'Game created successfully', game: game });
 };
 
 function getGameById (req, res) {
@@ -28,6 +28,8 @@ function updateGame (req, res) {
 
 function deleteGame (req, res) {
     const id = req.params.id;    
+
+    model_game.deleteGame(id);
 
     res.status(204).json({ message: 'Game deleted successfully' });
 };
