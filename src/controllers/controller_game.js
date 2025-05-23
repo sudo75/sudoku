@@ -21,7 +21,7 @@ function createGame(req, res) {
 
     model_games_info.increment_nextGameID();
     
-    res.status(201).json({ message: 'Game created successfully', game: game });
+    res.status(201).json({ message: 'Game created successfully', puzzle: game.puzzle });
 };
 
 function getGameById (req, res) {
