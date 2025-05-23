@@ -23,7 +23,15 @@ function createGame(game) { // ADD DATA PARAMS LATER
 function deleteGame(id) {
     let games = readGames();
 
-    games.splice(id, 1);
+    for (let i = 0; i < games.length; i++) {
+        const game = games[i];
+
+        const gameID = game.id;
+
+        if (gameID === id) {
+            games.splice(id, 1);
+        }
+    }
 
     writeGames(games);
 }

@@ -1,4 +1,5 @@
 const model_game = require('../models/model_game');
+const model_games_info = require('../models/model_games_info');
 
 const util_generateGame = require('../utils/util_generateGame');
 
@@ -6,10 +7,19 @@ const util_generateGame = require('../utils/util_generateGame');
 function createGame(req, res) {
 
     //const difficulty = req.body.difficulty;
+    const id = model_games_info.getProperty('nextGameID');
 
-    const game = util_generateGame.generateGame();
+    const game_generated = util_generateGame.generateGame();
+
+    const game = {
+        puzzle: game_generated.puzzle,
+        solution: game_generated.solution,
+        id: id
+    };
 
     model_game.createGame(game); // ADD DATA PARAMS LATER
+
+    model_games_info.increment_nextGameID();
     
     res.status(201).json({ message: 'Game created successfully', game: game });
 };
