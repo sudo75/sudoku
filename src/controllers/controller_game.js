@@ -1,7 +1,7 @@
 const model_game = require('../models/model_game');
 const model_games_info = require('../models/model_games_info');
 
-const util_generateGame = require('../utils/util_generateGame');
+const util_fillBoard = require('../utils/util_fillBoard');
 
 
 function createGame(req, res) {
@@ -9,11 +9,11 @@ function createGame(req, res) {
     //const difficulty = req.body.difficulty;
     const id = model_games_info.getProperty('nextGameID');
 
-    const game_generated = util_generateGame.generateGame();
-
+    const filledBoard = util_fillBoard.fillBoard();
+    
     const game = {
-        puzzle: game_generated.puzzle,
-        solution: game_generated.solution,
+        puzzle: filledBoard,
+        solution: filledBoard,
         id: id
     };
 
