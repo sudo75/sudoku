@@ -31,15 +31,14 @@ function generatePairs(quantity) {
 function generateSudoku() {
     let puzzle = fillBoard();
 
-    const targetRemovals = 16; // pairs
+    const targetRemovals = 20; // pairs
     let removals = 0;
     let i = 0;
-    const iterationLimit = 64;
 
     const removalPairs = generatePairs(41);
 
     while (removals < targetRemovals) {
-        if (i >= iterationLimit) return;
+        if (i >= removalPairs.length) break;
 
         let deepCoppy_puzzle = JSON.parse(JSON.stringify(puzzle));
 
