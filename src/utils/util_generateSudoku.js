@@ -56,7 +56,7 @@ function generateSudoku() {
         i++;
     }
 
-    const solution = solve(puzzle);
+    const solution = solve(JSON.parse(JSON.stringify(puzzle)));
 
     //TEST
     const puzzleTwoSolutions = [
