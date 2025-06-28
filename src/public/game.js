@@ -1,12 +1,30 @@
 class Game {
-    constructor(canvases, width, height) {
+    constructor(game_container, canvases, ui_container, width, height) {
+        this.game_container = game_container;
         this.canvases = canvases;
+        this.ui_container = ui_container;
+
         this.width = width;
         this.height = height;
 
         this.initBoard();
 
         this.puzzle = null;
+
+        canvases.board.addEventListener('click', (event) => {
+            let rect = this.canvases.board.getBoundingClientRect();
+            
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+
+            this.selectCell(x, y);
+        });
+
+        this.selectedCell = {
+            row: null,
+            col: null
+        };
+
     }
 
     initBoard() {
@@ -15,7 +33,16 @@ class Game {
 
             canvas.width = this.width;
             canvas.height = this.height;
+
+            canvas.style.width = `${this.width}px`;
+            canvas.style.height = `${this.height}px`;
         }
+
+        this.game_container.style.width = `${this.width}px`;
+        this.game_container.style.height = `${this.height}px`;
+
+        this.ui_container.style.width = `${this.width}px`;
+        this.ui_container.style.height = `${this.height}px`;
     }
 
     async getGame() {
@@ -53,6 +80,9 @@ class Game {
         const cell_width = this.width / 9;
         const cell_height = this.height / 9;
 
+        this.cell_width = cell_width;
+        this.cell_height = cell_height;
+
         // Clear canvas
         board_ctx.clearRect(0, 0, this.width, this.height);
 
@@ -65,6 +95,12 @@ class Game {
             for (let col = 0; col < 9; col++) {
                 const value = this.puzzle[row][col];
 
+                //Highlight cell
+                if (row === this.selectedCell.row && col === this.selectedCell.col) {
+                    board_ctx.fillStyle = "lightgrey";
+                    board_ctx.fillRect(col * cell_width, row * cell_height, cell_width, cell_height);
+                }
+
                 // Draw number if not zero
                 if (value !== 0) {
                     board_ctx.fillStyle = "black";
@@ -72,7 +108,8 @@ class Game {
                 }
 
                 // Draw cell border
-                board_ctx.strokeStyle = "lightgray";
+                board_ctx.strokeStyle = "lightgrey";
+                 board_ctx.lineWidth = 1;
                 board_ctx.strokeRect(col * cell_width, row * cell_height, cell_width, cell_height);
             }
         }
@@ -95,7 +132,18 @@ class Game {
                 board_ctx.stroke();
             }
         }
-        
+    }
+
+    selectCell(x, y) {
+        const row = Math.floor(y / this.cell_height);
+        const col = Math.floor(x / this.cell_width);
+
+        this.selectedCell = {
+            row: row,
+            col: col
+        };
+
+        this.renderBoard();
     }
 }
 

@@ -1,3 +1,16 @@
 canvas {
     border: 2px solid black;
+    box-sizing: border-box;
+}
+
+.game {
+    position: relative;
+}
+
+.game * {
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    
 }
