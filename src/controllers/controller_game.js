@@ -1,7 +1,7 @@
 const model_game = require('../models/model_game');
 const model_games_info = require('../models/model_games_info');
 
-const util_fillBoard = require('../utils/util_fillBoard');
+const util_generateSudoku = require('../utils/util_generateSudoku');
 
 
 function createGame(req, res) {
@@ -9,7 +9,7 @@ function createGame(req, res) {
     //const difficulty = req.body.difficulty;
     const id = model_games_info.getProperty('nextGameID');
 
-    const filledBoard = util_fillBoard.fillBoard();
+    const filledBoard = util_generateSudoku.generateSudoku().puzzle;
     
     const game = {
         puzzle: filledBoard,
