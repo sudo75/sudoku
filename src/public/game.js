@@ -11,13 +11,18 @@ class Game {
 
         this.puzzle = null;
 
-        canvases.board.addEventListener('click', (event) => {
-            let rect = this.canvases.board.getBoundingClientRect();
-            
-            const x = event.clientX - rect.left;
-            const y = event.clientY - rect.top;
+        window.addEventListener('click', (event) => {
+            if (event.target === canvases.board) {
+                let rect = this.canvases.board.getBoundingClientRect();
+                
+                const x = event.clientX - rect.left;
+                const y = event.clientY - rect.top;
 
-            this.selectCell(x, y);
+                this.selectCell(x, y);
+            } else {
+                this.deselectCells();
+            }
+            
         });
 
         this.selectedCell = {
@@ -141,6 +146,15 @@ class Game {
         this.selectedCell = {
             row: row,
             col: col
+        };
+
+        this.renderBoard();
+    }
+
+    deselectCells() {
+        this.selectedCell = {
+            row: null,
+            col: null
         };
 
         this.renderBoard();
