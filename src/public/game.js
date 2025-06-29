@@ -1,34 +1,53 @@
 class Game {
-    constructor(game_container, canvases, ui_container, width, height) {
+    constructor(game_container, canvases, board_ui, external_ui, width, height) {
         this.game_container = game_container;
         this.canvases = canvases;
-        this.ui_container = ui_container;
+        this.board_ui = board_ui;
+        this.external_ui = external_ui;
 
         this.width = width;
         this.height = height;
 
-        this.initBoard();
-
         this.puzzle = null;
 
-        window.addEventListener('click', (event) => {
-            if (event.target === canvases.board) {
-                let rect = this.canvases.board.getBoundingClientRect();
-                
-                const x = event.clientX - rect.left;
-                const y = event.clientY - rect.top;
-
-                this.selectCell(x, y);
-            } else {
-                this.deselectCells();
-            }
-            
-        });
+        this.status = 0; // Game off = 0, game on = 1
 
         this.selectedCell = {
             row: null,
             col: null
         };
+
+        this.initBoard();
+        this.initUI_external();
+
+        window.addEventListener('click', (event) => {
+
+            if (this.status === 1) {
+                if (event.target === canvases.board) {
+                    let rect = this.canvases.board.getBoundingClientRect();
+                    
+                    const x = event.clientX - rect.left;
+                    const y = event.clientY - rect.top;
+
+                    this.selectCell(x, y);
+                } else {
+                    this.deselectCells();
+                }
+            } else if (this.status === 0) {
+
+                switch (event.target.id) {
+                    
+                }
+
+            }
+            
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (!isNaN(event.key)) {
+                this.inputNumber(event.key);
+            }
+        });
 
     }
 
@@ -46,8 +65,122 @@ class Game {
         this.game_container.style.width = `${this.width}px`;
         this.game_container.style.height = `${this.height}px`;
 
-        this.ui_container.style.width = `${this.width}px`;
-        this.ui_container.style.height = `${this.height}px`;
+        this.board_ui.style.width = `${this.width}px`;
+        this.board_ui.style.height = `${this.height}px`;
+
+        this.external_ui.style.width = `${this.width}px`;
+        this.external_ui.style.height = `${this.height / 12}px`;
+    }
+
+    closeUI_board() {
+        this.board_ui.style.display = 'none';
+
+        // Clear UI elements
+        const board_ui_elements = this.board_ui.querySelectorAll('*');
+        for (const child of board_ui_elements) {
+            this.board_ui.removeChild(child);
+        }
+    }
+
+    initUI_board() {
+        
+        this.closeUI_board();
+
+        this.board_ui.style.display = '';
+
+        let new_UI_elements = [];
+
+        if (this.status === 0) { // New game menu
+
+            // Easy
+            const game_easy = document.createElement('button');
+            game_easy.innerText = 'Easy';
+            game_easy.classList.add('btn');
+
+            game_easy.addEventListener('click', () => {
+                this.startGame(0);
+            });
+
+            new_UI_elements.push(game_easy);
+            
+        }
+
+
+        for (const UI_element of new_UI_elements) {
+            this.board_ui.append(UI_element);
+        }
+    }
+
+    closeUI_external() {
+        // Clear UI elements
+        const external_ui_elements = this.external_ui.querySelectorAll('*');
+        for (const child of external_ui_elements) {
+            this.external_ui.removeChild(child);
+        }
+    }
+
+    initUI_external() {
+
+        this.closeUI_external();
+
+        let new_UI_elements = [];
+
+        if (this.status === 0) {
+            const newGame = document.createElement('button');
+            newGame.innerText = 'New Game';
+            newGame.classList.add('btn');
+
+            newGame.addEventListener('click', () => {
+                this.initUI_board();
+            });
+
+            new_UI_elements.push(newGame);
+            
+        }
+
+        if (this.status === 1) {
+            for (let i = 1; i <= 9; i++) {
+                const btn = document.createElement('button');
+                btn.innerText = i;
+                btn.classList.add('btn');
+
+                btn.addEventListener('click', () => {
+                    this.inputNumber(i);
+                });
+
+                new_UI_elements.push(btn);
+            }
+            
+            
+        }
+
+
+        for (const UI_element of new_UI_elements) {
+            this.external_ui.append(UI_element);
+        }
+        
+
+        
+    }
+
+    setStatus(setting) {
+        this.status = setting;
+
+        if (this.status === 0) {
+            this.board_ui.style.hidden = false;
+        } else if (this.status === 1) {
+            this.board_ui.style.hidden = true;
+        }
+    }
+
+    startGame(difficulty) {
+        this.setStatus(1);
+
+        this.closeUI_board();
+        this.initUI_external();
+
+
+        this.getGame();
     }
 
     async getGame() {
@@ -71,6 +204,7 @@ class Game {
                 console.log('Server response:', data);
 
                 this.puzzle = data.puzzle;
+
                 this.renderBoard();
             })
             .catch(error => {
@@ -78,7 +212,13 @@ class Game {
             });
     }
 
+    onLoss() {
+        
+    }
+
     renderBoard() {
+        if (!this.puzzle) return;
+
         const board = this.canvases.board;
         const board_ctx = board.getContext('2d');
 
@@ -158,6 +298,10 @@ class Game {
         };
 
         this.renderBoard();
+    }
+
+    inputNumber(number) {
+        console.log(number)
     }
 }
 

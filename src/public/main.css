@@ -11,6 +11,34 @@ canvas {
     position: absolute;
     top: 0;
     left: 0;
+}
 
-    
+.btn {
+    cursor: pointer;
+
+    min-height: auto;
+    border: none;
+    background-color: rgb(230, 230, 230);
+}
+
+.btn:hover {
+    background-color: rgb(200, 200, 200);
+}
+
+.board_ui {
+    z-index: 2;
+}
+
+.board_ui .btn {
+    width: 60%;
+    height: 15%;
+}
+
+.external_ui {
+    display: flex;
+}
+
+.external_ui .btn {
+    flex: 1;
+    height: 100%;
 }
