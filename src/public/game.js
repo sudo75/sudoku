@@ -17,6 +17,8 @@ class Game {
             col: null
         };
 
+        this.invalidHighlight = []; //Highlight these cells after incorrect answer
+
         this.initBoard();
         this.initUI_external();
 
@@ -45,7 +47,7 @@ class Game {
 
         document.addEventListener('keydown', (event) => {
             if (!isNaN(event.key)) {
-                this.inputNumber(event.key);
+                this.inputNumber(Number(event.key));
             }
         });
 
@@ -198,12 +200,14 @@ class Game {
                 
                 const data = response.json(); // Promise
                 
-                return data; // Will return one promise is fulfilled
+                return data; // Will return once promise is fulfilled
             })
             .then(data => {
                 console.log('Server response:', data);
 
-                this.puzzle = data.puzzle;
+                this.puzzle = JSON.parse(JSON.stringify(data.puzzle));
+                this.base_puzzle = JSON.parse(JSON.stringify(data.puzzle));
+                this.id = data.id;
 
                 this.renderBoard();
             })
@@ -212,8 +216,14 @@ class Game {
             });
     }
 
+    isPlayerInput(row, col) { //Check if this value was inputted by the player --- not of the original puzzle
+        if (this.puzzle[row][col] !== this.base_puzzle[row][col]) return true;
+
+        return false;
+    }
+
     onLoss() {
-        
+
     }
 
     renderBoard() {
@@ -245,16 +255,23 @@ class Game {
                     board_ctx.fillStyle = "lightgrey";
                     board_ctx.fillRect(col * cell_width, row * cell_height, cell_width, cell_height);
                 }
+                if (this.invalidHighlight.some(cell => cell.row === row && cell.col === col)) {
+                    board_ctx.fillStyle = "rgb(255, 180, 180)";
+                    board_ctx.fillRect(col * cell_width, row * cell_height, cell_width, cell_height);
+                }
+
 
                 // Draw number if not zero
                 if (value !== 0) {
-                    board_ctx.fillStyle = "black";
+                    if (this.isPlayerInput(row, col)) board_ctx.fillStyle = "rgb(100, 100, 100)";
+                    if (!this.isPlayerInput(row, col)) board_ctx.fillStyle = "black";
+                    
                     board_ctx.fillText(value, col * cell_width + cell_width / 2, row * cell_height + cell_height / 2);
                 }
 
                 // Draw cell border
-                board_ctx.strokeStyle = "lightgrey";
-                 board_ctx.lineWidth = 1;
+                board_ctx.strokeStyle = "lightgrey";                
+                board_ctx.lineWidth = 1;
                 board_ctx.strokeRect(col * cell_width, row * cell_height, cell_width, cell_height);
             }
         }
@@ -301,7 +318,51 @@ class Game {
     }
 
     inputNumber(number) {
-        console.log(number)
+        const { row, col } = this.selectedCell;
+
+        if (this.status !== 1) return;
+        if (row == null || col == null) return;
+
+        //console.log(`row: ${row}, col: ${col}, input: ${number}`);
+
+        fetch(`/api/games/${this.id}/input`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ row: row, col: col, input: number })
+        })
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                
+                const data = response.json(); // Promise
+                
+                return data; // Will return once promise is fulfilled
+            })
+            .then(data => {
+                console.log('Server response:', data);
+
+                this.puzzle = data.puzzle;
+                
+                this.invalidHighlight.push({row: row, col: col});
+
+                setTimeout(() => {
+                    
+                    for (let i = this.invalidHighlight.length - 1; i >= 0; i--) {
+                        const cell = this.invalidHighlight[i];
+                        if (cell.row === row && cell.col === col) {
+                            this.invalidHighlight.splice(i, 1);
+                        }
+                    }
+                    
+                    this.renderBoard();
+                }, 2000);
+
+                this.renderBoard();
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+            });
+    
+
     }
 }
 

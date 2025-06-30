@@ -9,11 +9,12 @@ function createGame(req, res) {
     //const difficulty = req.body.difficulty;
     const id = model_games_info.getProperty('nextGameID');
 
-    const filledBoard = util_generateSudoku.generateSudoku().puzzle;
+    const sudoku = util_generateSudoku.generateSudoku();
     
     const game = {
-        puzzle: filledBoard,
-        solution: filledBoard,
+        base_puzzle: sudoku.puzzle,
+        puzzle: sudoku.puzzle,
+        solution: sudoku.solution,
         id: id
     };
 
@@ -21,19 +22,35 @@ function createGame(req, res) {
 
     model_games_info.increment_nextGameID();
     
-    res.status(201).json({ message: 'Game created successfully', puzzle: game.puzzle });
+    res.status(201).json({ message: 'Game created successfully', puzzle: game.puzzle, id: game.id });
 };
 
-function getGameById (req, res) {
+function getPuzzleById (req, res) {
     const id = req.params.id;
+
+    const puzzle = model_game.readPuzzle(id);
     
-    res.status(200).json({ message: 'Game fetched successfully' });
+    res.status(200).json({ message: 'Game fetched successfully',  puzzle: puzzle});
 };
 
 function updateGame (req, res) {
-    const id = req.params.id;    
+    const id = req.params.id;
 
-    res.status(200).json({ message: 'Game updated successfully' });
+    const {row, col, input} = req.body;
+
+    const solution = model_game.readSolution(id);
+
+    let valid;
+    if (solution[row][col] === input) { // Check if entry is valid
+        model_game.inputValue(id, row, col, input);
+        valid = true;
+    } else {
+        valid = false;
+    }
+
+    const puzzle = model_game.readPuzzle(id);
+
+    res.status(200).json({ message: 'Game updated successfully', puzzle: puzzle, valid: valid });
 };
 
 function deleteGame (req, res) {
@@ -47,7 +64,7 @@ function deleteGame (req, res) {
 // Export functions
 module.exports = {
     createGame,
-    getGameById,
+    getPuzzleById,
     updateGame,
     deleteGame
 };
