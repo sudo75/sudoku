@@ -1,7 +1,8 @@
 class Game {
-    constructor(game_container, canvases, board_ui, external_ui1, external_ui2, width, height) {
+    constructor(game_container, canvases, label, board_ui, external_ui1, external_ui2, width, height) {
         this.game_container = game_container;
         this.canvases = canvases;
+        this.label = label;
         this.board_ui = board_ui;
         this.external_ui1 = external_ui1;
         this.external_ui2 = external_ui2;
@@ -14,11 +15,15 @@ class Game {
         this.puzzle_pencil = Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => []));
 
         this.status = 0; // Game off = 0, game on = 1
+        this.difficulty = 0; // 0 = easy, 1 = medium, 2 = hard, 3 = very hard
+        this.errors = 0;
 
         this.selectedCell = {
             row: null,
             col: null
         };
+
+        this.fontSize_external = this.height / 9 * 0.5;
 
         this.fontSize_cell;
         this.fontSize_pencil;
@@ -31,6 +36,7 @@ class Game {
 
         this.initBoard();
         this.initUI_external();
+        this.initLabel();
 
         window.addEventListener('click', (event) => {
 
@@ -93,6 +99,32 @@ class Game {
         this.external_ui1.style.height = `${this.height / 9}px`;
         this.external_ui2.style.width = `${this.width}px`;
         this.external_ui2.style.height = `${this.height / 9}px`;
+
+        this.label.style.width = `${this.width}px`;
+        this.label.style.height = `${this.height / 9}px`;
+
+    }
+
+    initLabel() {
+        if (this.status === 0) {
+            this.label.innerText = 'Sudoku';
+            this.label.style.fontSize = `${this.fontSize_external}px`;
+        } else if (this.status === 1 || this.status === 2 || this.status === 3) {
+            const difficulty = (() => {
+                switch (this.difficulty) {
+                    case 0:
+                        return 'Easy';
+                    case 0:
+                        return 'Medium';
+                    case 0:
+                        return 'Hard';
+                    case 0:
+                        return 'Very Hard';
+                }
+            })();
+            this.label.innerText = `${difficulty} - ${this.errors}/3 errors`
+            this.label.style.fontSize = `${this.fontSize_external}px`;
+        }
     }
 
     clearBoard() {
@@ -150,6 +182,7 @@ class Game {
 
                 this.clearBoard();
                 this.initUI_external();
+                this.initLabel();
             });
 
             new_UI_elements.push(continue_btn);
@@ -165,6 +198,7 @@ class Game {
 
                 this.clearBoard();
                 this.initUI_external();
+                this.initLabel();
             });
 
             new_UI_elements.push(continue_btn);
@@ -172,6 +206,7 @@ class Game {
 
 
         for (const UI_element of new_UI_elements) {
+            UI_element.style.fontSize = `${this.fontSize_external}px`;
             this.board_ui.append(UI_element);
         }
     }
@@ -251,10 +286,12 @@ class Game {
 
 
         for (const UI_element of new_UI1_elements) {
+            UI_element.style.fontSize = `${this.fontSize_external}px`;
             this.external_ui1.append(UI_element);
         }
 
         for (const UI_element of new_UI2_elements) {
+            UI_element.style.fontSize = `${this.fontSize_external * 0.75}px`;
             this.external_ui2.append(UI_element);
         }
         
@@ -265,9 +302,11 @@ class Game {
     startGame(difficulty) {
 
         this.status = 1;
+        this.difficulty = difficulty;
         
         this.closeUI_board();
         this.initUI_external();
+        this.initLabel();
 
 
         this.getGame();
@@ -322,6 +361,8 @@ class Game {
 
         this.puzzle = null;
         this.base_puzzle = null;
+
+        this.errors = 0;
     }
 
     renderBoard() {
@@ -503,12 +544,17 @@ class Game {
 
                 this.status = data.status;
                 if (data.status === 2 || data.status === 3) { // loss or win
+                    this.errors++;
+                    
                     this.renderBoard();
+                    this.initLabel();
                     this.onFinish();
                     return;
                 }
                 
                 if (!data.valid) {
+                    this.errors++;
+
                     this.invalidHighlight.push({row: row, col: col});
 
                     setTimeout(() => {
@@ -527,6 +573,7 @@ class Game {
                 this.reqPending = false;
 
                 this.renderBoard();
+                this.initLabel();
             })
             .catch(error => {
                 console.error('Fetch error:', error);

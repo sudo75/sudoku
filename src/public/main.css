@@ -21,7 +21,6 @@ canvas {
     background-color: rgb(230, 230, 230);
 
     font-family: 'Courier New', Courier, monospace;
-    font-size: 24px;
 }
 
 .btn:hover {
@@ -52,4 +51,19 @@ canvas {
 .external_ui .btn {
     flex: 1;
     height: 100%;
+}
+
+.label {
+    background-color: rgb(230, 230, 230);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    box-sizing: border-box;
+    border: 2px solid black;
+    border-bottom: none;
+
+    font-weight: bold;
+    font-family: 'Courier New', Courier, monospace;
 }
