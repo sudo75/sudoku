@@ -266,6 +266,7 @@ class Game {
 
             // Settings
 
+            // Pencil
             const pencil = document.createElement('button');
             pencil.innerText = 'pencil off';
             pencil.classList.add('btn');
@@ -278,7 +279,7 @@ class Game {
 
             new_UI2_elements.push(pencil);
 
-
+            // Eraser
             const erase = document.createElement('button');
             erase.innerText = 'erase';
             erase.classList.add('btn');
@@ -288,6 +289,18 @@ class Game {
             });
 
             new_UI2_elements.push(erase);
+
+            // Exit
+            const exit = document.createElement('button');
+            exit.innerText = 'exit';
+            exit.classList.add('btn');
+
+            exit.addEventListener('click', () => {
+                this.status = 2;
+                this.onFinish();
+            });
+
+            new_UI2_elements.push(exit);
             
         }
 
