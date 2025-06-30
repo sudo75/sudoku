@@ -76,6 +76,10 @@ class Game {
             this.heldKeys.delete(event.key);
         });
 
+        window.addEventListener('beforeunload', (event) => {
+            if (this.status === 1) event.preventDefault();
+        });
+
     }
 
     initBoard() {
