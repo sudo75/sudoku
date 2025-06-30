@@ -342,19 +342,22 @@ class Game {
 
                 this.puzzle = data.puzzle;
                 
-                this.invalidHighlight.push({row: row, col: col});
+                if (!data.valid) {
+                    this.invalidHighlight.push({row: row, col: col});
 
-                setTimeout(() => {
-                    
-                    for (let i = this.invalidHighlight.length - 1; i >= 0; i--) {
-                        const cell = this.invalidHighlight[i];
-                        if (cell.row === row && cell.col === col) {
-                            this.invalidHighlight.splice(i, 1);
+                    setTimeout(() => {
+                        
+                        for (let i = this.invalidHighlight.length - 1; i >= 0; i--) {
+                            const cell = this.invalidHighlight[i];
+                            if (cell.row === row && cell.col === col) {
+                                this.invalidHighlight.splice(i, 1);
+                            }
                         }
-                    }
-                    
-                    this.renderBoard();
-                }, 2000);
+                        
+                        this.renderBoard();
+                    }, 2000);
+                }
+                
 
                 this.renderBoard();
             })
