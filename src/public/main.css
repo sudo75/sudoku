@@ -19,6 +19,9 @@ canvas {
     min-height: auto;
     border: none;
     background-color: rgb(230, 230, 230);
+
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 24px;
 }
 
 .btn:hover {
@@ -32,6 +35,10 @@ canvas {
 .board_ui .btn {
     width: 60%;
     height: 15%;
+
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
 }
 
 .external_ui {

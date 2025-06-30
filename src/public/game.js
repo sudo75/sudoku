@@ -66,7 +66,7 @@ class Game {
         this.board_ui.style.height = `${this.height}px`;
 
         this.external_ui.style.width = `${this.width}px`;
-        this.external_ui.style.height = `${this.height / 12}px`;
+        this.external_ui.style.height = `${this.height / 9}px`;
     }
 
     clearBoard() {
