@@ -5,11 +5,11 @@ const util_generateSudoku = require('../utils/util_generateSudoku');
 
 
 function createGame(req, res) {
-
-    //const difficulty = req.body.difficulty;
+    const difficulty = req.body.difficulty;
+    
     const id = model_games_info.getProperty('nextGameID');
 
-    const sudoku = util_generateSudoku.generateSudoku();
+    const sudoku = util_generateSudoku.generateSudoku(difficulty);
     
     const game = {
         base_puzzle: sudoku.puzzle,

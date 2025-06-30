@@ -28,10 +28,24 @@ function generatePairs(quantity) {
     return pairs;
 }
 
-function generateSudoku() {
+function generateSudoku(difficulty) {
     let puzzle = fillBoard();
 
-    const targetRemovals = 20; // pairs
+    const targetRemovals = (() => {
+        // 0 = easy, 1 = medium, 2 = hard, 3 = very hard
+
+        switch(difficulty) {
+            case 0:
+                return 16;
+            case 1:
+                return 22;
+            case 2:
+                return 26;
+            case 3:
+                return 30;
+        }
+    })(); // pairs
+    
     let removals = 0;
     let i = 0;
 

@@ -114,11 +114,11 @@ class Game {
                 switch (this.difficulty) {
                     case 0:
                         return 'Easy';
-                    case 0:
+                    case 1:
                         return 'Medium';
-                    case 0:
+                    case 2:
                         return 'Hard';
-                    case 0:
+                    case 3:
                         return 'Very Hard';
                 }
             })();
@@ -138,7 +138,7 @@ class Game {
     }
 
     closeUI_board() {
-        this.board_ui.hidden = true;
+        this.board_ui.style.pointerEvents = 'none';
 
         // Clear UI elements
         const board_ui_elements = this.board_ui.querySelectorAll('*');
@@ -151,24 +151,31 @@ class Game {
         
         this.closeUI_board();
 
-        this.board_ui.hidden = false;
+        this.board_ui.style.pointerEvents = 'auto';
 
         let new_UI_elements = [];
 
         if (this.status === 0) { // New game menu
 
-            // Easy
-            const game_easy = document.createElement('button');
-            game_easy.innerText = 'Easy';
-            game_easy.classList.add('btn');
+            const difficulties = [
+                { label: 'Easy', level: 0 },
+                { label: 'Medium', level: 1 },
+                { label: 'Hard', level: 2 },
+                { label: 'Very Hard', level: 3 }
+            ];
 
-            game_easy.addEventListener('click', () => {
-                this.startGame(0);
+            difficulties.forEach(({ label, level }) => {
+                const button = document.createElement('button');
+                button.innerText = label;
+                button.classList.add('btn');
 
-                this.closeUI_board();
+                button.addEventListener('click', () => {
+                    this.startGame(level);
+                    this.closeUI_board();
+                });
+
+                new_UI_elements.push(button);
             });
-
-            new_UI_elements.push(game_easy);
             
         } else if (this.status === 2) {
 
@@ -309,16 +316,18 @@ class Game {
         this.initLabel();
 
 
-        this.getGame();
+        this.getGame(difficulty);
     }
 
-    async getGame() {
+    async getGame(difficulty) {
         const options = {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: ''
+            body: JSON.stringify({
+                difficulty: difficulty
+            })
         }
 
         fetch('api/games', options) // include options to set values (ex. method will default to GET, otherwise)
@@ -545,7 +554,7 @@ class Game {
                 this.status = data.status;
                 if (data.status === 2 || data.status === 3) { // loss or win
                     this.errors++;
-                    
+
                     this.renderBoard();
                     this.initLabel();
                     this.onFinish();
