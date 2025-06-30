@@ -18,7 +18,10 @@ class Game {
             col: null
         };
 
-        this.invalidHighlight = []; //Highlight these cells after incorrect answer
+        this.cooldown = 0; // in periods
+        this.reqPending = false;
+
+        this.invalidHighlight = []; // Highlight these cells after incorrect answer
 
         this.initBoard();
         this.initUI_external();
@@ -356,11 +359,21 @@ class Game {
     inputNumber(number) {
         if (this.status !== 1) return;
 
+        if (this.cooldown > 0) return;
+        if (this.reqPending) return;
+
         const { row, col } = this.selectedCell;
         if (row == null || col == null) return;
 
         //console.log(`row: ${row}, col: ${col}, input: ${number}`);
 
+        this.cooldown++;
+        setTimeout(() => {
+            this.cooldown--;
+        }, 200);
+
+
+        this.reqPending = true;
         fetch(`/api/games/${this.id}/input`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
@@ -401,6 +414,7 @@ class Game {
                     }, 2000);
                 }
                 
+                this.reqPending = false;
 
                 this.renderBoard();
             })
