@@ -25,7 +25,7 @@ function createGame(req, res) {
     model_games_info.increment_nextGameID();
     
     res.status(201).json({ message: 'Game created successfully', puzzle: game.puzzle, id: game.id, status: game.status });
-};
+}
 
 function getPuzzleById (req, res) {
     const id = req.params.id;
@@ -33,7 +33,7 @@ function getPuzzleById (req, res) {
     const puzzle = model_game.readPuzzle(id);
     
     res.status(200).json({ message: 'Game fetched successfully',  puzzle: puzzle});
-};
+}
 
 function updateGame (req, res) {
     const id = req.params.id;
@@ -61,7 +61,7 @@ function updateGame (req, res) {
 
 
     const puzzle = model_game.readPuzzle(id);
-    
+
     // Check if puzzle is complete
     const isComplete = (() => {
         for (let i = 0; i < 9; i++) {
@@ -78,7 +78,7 @@ function updateGame (req, res) {
     status = model_game.getProperty(id, 'status');
 
     res.status(200).json({ message: 'Game updated successfully', puzzle: puzzle, valid: valid, status: status });
-};
+}
 
 function deleteGame (req, res) {
     const id = req.params.id;    
@@ -86,7 +86,7 @@ function deleteGame (req, res) {
     model_game.deleteGame(id);
 
     res.status(204).json({ message: 'Game deleted successfully' });
-};
+}
 
 // Export functions
 module.exports = {
