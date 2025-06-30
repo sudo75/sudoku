@@ -204,6 +204,8 @@ class Game {
 
     startGame(difficulty) {
 
+        this.status = 1;
+        
         this.closeUI_board();
         this.initUI_external();
 
@@ -234,7 +236,6 @@ class Game {
                 this.puzzle = JSON.parse(JSON.stringify(data.puzzle));
                 this.base_puzzle = JSON.parse(JSON.stringify(data.puzzle));
                 this.id = data.id;
-                this.status = data.status;
 
                 this.renderBoard();
             })
@@ -353,9 +354,9 @@ class Game {
     }
 
     inputNumber(number) {
-        const { row, col } = this.selectedCell;
-
         if (this.status !== 1) return;
+
+        const { row, col } = this.selectedCell;
         if (row == null || col == null) return;
 
         //console.log(`row: ${row}, col: ${col}, input: ${number}`);
