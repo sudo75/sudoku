@@ -313,8 +313,10 @@ class Game {
             exit.classList.add('btn');
 
             exit.addEventListener('click', () => {
-                this.status = 2;
-                this.onFinish();
+                if (confirm('Exit game?')) {
+                    this.status = 2;
+                    this.onFinish();
+                }
             });
 
             new_UI2_elements.push(exit);
