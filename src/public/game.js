@@ -1,15 +1,17 @@
 class Game {
-    constructor(game_container, canvases, board_ui, external_ui, width, height) {
+    constructor(game_container, canvases, board_ui, external_ui1, external_ui2, width, height) {
         this.game_container = game_container;
         this.canvases = canvases;
         this.board_ui = board_ui;
-        this.external_ui = external_ui;
+        this.external_ui1 = external_ui1;
+        this.external_ui2 = external_ui2;
 
         this.width = width;
         this.height = height;
 
         this.base_puzzle = null;
         this.puzzle = null;
+        this.puzzle_pencil = Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => []));
 
         this.status = 0; // Game off = 0, game on = 1
 
@@ -18,7 +20,11 @@ class Game {
             col: null
         };
 
-        this.cooldown = 0; // in periods
+        this.fontSize_cell;
+        this.fontSize_pencil;
+
+        this.pencil = false;
+
         this.reqPending = false;
 
         this.invalidHighlight = []; // Highlight these cells after incorrect answer
@@ -37,16 +43,31 @@ class Game {
 
                     this.selectCell(x, y);
                 } else {
-                    this.deselectCells();
+                    if (!event.target.classList.contains('btn')) {
+                        this.deselectCells();
+                    }
                 }
             }
             
         });
 
+
+        this.heldKeys = new Set();
+
         document.addEventListener('keydown', (event) => {
+            if (this.heldKeys.has(event.key)) return;
+            this.heldKeys.add(event.key)
+
             if (!isNaN(event.key)) {
                 this.inputNumber(Number(event.key));
             }
+            if (event.key === 'Backspace') {
+                this.erase_pencil();
+            }
+        });
+
+        document.addEventListener('keyup', (event) => {
+            this.heldKeys.delete(event.key);
         });
 
     }
@@ -68,8 +89,10 @@ class Game {
         this.board_ui.style.width = `${this.width}px`;
         this.board_ui.style.height = `${this.height}px`;
 
-        this.external_ui.style.width = `${this.width}px`;
-        this.external_ui.style.height = `${this.height / 9}px`;
+        this.external_ui1.style.width = `${this.width}px`;
+        this.external_ui1.style.height = `${this.height / 9}px`;
+        this.external_ui2.style.width = `${this.width}px`;
+        this.external_ui2.style.height = `${this.height / 9}px`;
     }
 
     clearBoard() {
@@ -155,9 +178,13 @@ class Game {
 
     closeUI_external() {
         // Clear UI elements
-        const external_ui_elements = this.external_ui.querySelectorAll('*');
-        for (const child of external_ui_elements) {
-            this.external_ui.removeChild(child);
+        const external_ui1_elements = this.external_ui1.querySelectorAll('*');
+        for (const child of external_ui1_elements) {
+            this.external_ui1.removeChild(child);
+        }
+        const external_ui2_elements = this.external_ui2.querySelectorAll('*');
+        for (const child of external_ui2_elements) {
+            this.external_ui2.removeChild(child);
         }
     }
 
@@ -165,7 +192,8 @@ class Game {
 
         this.closeUI_external();
 
-        let new_UI_elements = [];
+        let new_UI1_elements = [];
+        let new_UI2_elements = [];
 
         if (this.status === 0) {
             const newGame = document.createElement('button');
@@ -176,11 +204,12 @@ class Game {
                 this.initUI_board();
             });
 
-            new_UI_elements.push(newGame);
+            new_UI1_elements.push(newGame);
             
         }
 
         if (this.status === 1) {
+            // Number input buttons
             for (let i = 1; i <= 9; i++) {
                 const btn = document.createElement('button');
                 btn.innerText = i;
@@ -190,15 +219,43 @@ class Game {
                     this.inputNumber(i);
                 });
 
-                new_UI_elements.push(btn);
+                new_UI1_elements.push(btn);
             }
-            
+
+            // Settings
+
+            const pencil = document.createElement('button');
+            pencil.innerText = 'pencil off';
+            pencil.classList.add('btn');
+
+            pencil.addEventListener('click', () => {
+                this.pencil = !this.pencil;
+
+                pencil.innerText = this.pencil ? 'pencil on' : 'pencil off';
+            });
+
+            new_UI2_elements.push(pencil);
+
+
+            const erase = document.createElement('button');
+            erase.innerText = 'erase';
+            erase.classList.add('btn');
+
+            erase.addEventListener('click', () => {
+                this.erase_pencil();
+            });
+
+            new_UI2_elements.push(erase);
             
         }
 
 
-        for (const UI_element of new_UI_elements) {
-            this.external_ui.append(UI_element);
+        for (const UI_element of new_UI1_elements) {
+            this.external_ui1.append(UI_element);
+        }
+
+        for (const UI_element of new_UI2_elements) {
+            this.external_ui2.append(UI_element);
         }
         
 
@@ -261,6 +318,8 @@ class Game {
             row: null,
             col: null
         };
+        this.pencil = false;
+
         this.puzzle = null;
         this.base_puzzle = null;
     }
@@ -289,6 +348,8 @@ class Game {
             for (let col = 0; col < 9; col++) {
                 const value = this.puzzle[row][col];
 
+                const values_pencil = this.puzzle_pencil[row][col];
+
                 //Highlight cell
                 if (row === this.selectedCell.row && col === this.selectedCell.col) {
                     board_ctx.fillStyle = "lightgrey";
@@ -305,7 +366,33 @@ class Game {
                     if (this.isPlayerInput(row, col)) board_ctx.fillStyle = "rgb(100, 100, 100)";
                     if (!this.isPlayerInput(row, col)) board_ctx.fillStyle = "black";
                     
-                    board_ctx.fillText(value, col * cell_width + cell_width / 2, row * cell_height + cell_height / 2);
+                    this.fontSize_cell = Math.floor((this.width / 9) * 0.7);
+                    board_ctx.font = `${this.fontSize_cell}px "Times New Roman"`;
+
+                    const x = col * cell_width + cell_width / 2;
+                    const y = row * cell_height + cell_height / 2;
+
+                    board_ctx.fillText(value, x, y);
+                } else {
+                    board_ctx.fillStyle = "rgb(100, 100, 100)";
+                    for (let i = 0; i < values_pencil.length; i++) {
+                        const value = values_pencil[i];
+
+                        this.fontSize_pencil = this.fontSize_cell / 3;
+                        board_ctx.font = `${this.fontSize_pencil}px "Courier"`;
+
+                        const subRow = Math.floor((value - 1) / 3);
+                        const subCol = (value - 1) % 3;
+
+                        const subCell_width = cell_width / 3;
+                        const subCell_height = cell_height / 3;
+
+                        const x = (col * cell_width) + (subCell_width * subCol) + (subCell_width / 2);
+                        const y = (row * cell_height) + (subCell_height * subRow) + (subCell_height / 2);
+
+                        board_ctx.fillText(value, x, y);
+                    }
+                    
                 }
 
                 // Draw cell border
@@ -356,10 +443,37 @@ class Game {
         this.renderBoard();
     }
 
+    inputPencil(number) {
+        if (typeof number !== 'number') return;
+        if (number < 1 || number > 9) return;
+
+        const { row, col } = this.selectedCell;
+
+        const number_index = this.puzzle_pencil[row][col].indexOf(number);
+        if (number_index === -1) {
+            this.puzzle_pencil[row][col].push(number);
+        } else {
+            this.puzzle_pencil[row][col].splice(number_index, 1);
+        }
+        
+        this.renderBoard();
+    }
+
+    erase_pencil() {
+        const { row, col } = this.selectedCell;
+        if (row == null || col == null) return;
+
+        this.puzzle_pencil[row][col] = [];
+
+        this.renderBoard();
+    }
+
     inputNumber(number) {
+        if (typeof number !== 'number') return;
+        if (number < 1 || number > 9) return;
+
         if (this.status !== 1) return;
 
-        if (this.cooldown > 0) return;
         if (this.reqPending) return;
 
         const { row, col } = this.selectedCell;
@@ -367,11 +481,7 @@ class Game {
 
         //console.log(`row: ${row}, col: ${col}, input: ${number}`);
 
-        this.cooldown++;
-        setTimeout(() => {
-            this.cooldown--;
-        }, 200);
-
+        if (this.pencil) return this.inputPencil(number);
 
         this.reqPending = true;
         fetch(`/api/games/${this.id}/input`, {

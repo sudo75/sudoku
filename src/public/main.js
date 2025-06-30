@@ -6,7 +6,8 @@ const canvases = {
 
 const game_container = document.querySelector('.game');
 const board_ui = document.querySelector('.board_ui');
-const external_ui = document.querySelector('.external_ui');
+const external_ui1 = document.querySelector('.external_ui1');
+const external_ui2 = document.querySelector('.external_ui2');
 
 
 // Set dimensions
@@ -24,9 +25,8 @@ const maxAvailableHeight = screenHeight - verticalMargin;
 
 const minDimension = Math.min(maxAvailableWidth, maxAvailableHeight, 600);
 
-const width = minDimension;
-const height = minDimension;
+const boardDimension = minDimension * 5/6;
 
 // Define game
 
-const game = new Game(game_container, canvases, board_ui, external_ui, width, height);
+const game = new Game(game_container, canvases, board_ui, external_ui1, external_ui2, boardDimension, boardDimension);
