@@ -171,6 +171,7 @@ class Game {
             difficulties.forEach(({ label, level }) => {
                 const button = document.createElement('button');
                 button.innerText = label;
+                button.style.fontWeight = 'bold';
                 button.classList.add('btn');
 
                 button.addEventListener('click', () => {
@@ -180,6 +181,18 @@ class Game {
 
                 new_UI_elements.push(button);
             });
+
+
+            const puzzle_sheet = document.createElement('button');
+            puzzle_sheet.innerText = 'Puzzle Sheet';
+            puzzle_sheet.style.fontStyle = 'italic';
+            puzzle_sheet.classList.add('btn');
+
+            puzzle_sheet.addEventListener('click', () => {
+                window.location = './puzzle-sheet.html'
+            });
+
+            new_UI_elements.push(puzzle_sheet);
             
         } else if (this.status === 2) {
 
