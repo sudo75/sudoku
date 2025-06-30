@@ -1,5 +1,4 @@
 const { shuffleArray } = require('./misc.js');
-const { arrayEqual2D } = require('./misc.js');
 
 function isSafe(board, row, col, num) {
     
@@ -123,7 +122,7 @@ function solve(board) {
 }
 
 function fillBoard() { //default to empty grid if initial value is not specified
-    const board = Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => 0))
+    const board = Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => 0));
     
     const fill_recursively = (r, c) => {
         if (c > 8) {
