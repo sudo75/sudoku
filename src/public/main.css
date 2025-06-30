@@ -28,6 +28,10 @@ canvas {
     background-color: rgb(200, 200, 200);
 }
 
+.btn:focus {
+    outline: none;
+}
+
 .board_ui {
     z-index: 2;
 }
