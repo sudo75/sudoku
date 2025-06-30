@@ -12,6 +12,22 @@ function writeGames(games) {
     fs.writeFileSync(filePath, JSON.stringify(games, null, 4)); // third arg sets indentation
 }
 
+function getProperty(id, property) {
+    const games = readGames();
+
+    const property_value = games[id][property];
+
+    return property_value;
+}
+
+function editProperty(id, property, value) {
+    const games = readGames();
+
+    games[id][property] = value;
+
+    writeGames(games);
+}
+
 function inputValue(id, row, col, value) {
     const games = readGames();
 
@@ -60,5 +76,7 @@ module.exports = {
     deleteGame,
     readPuzzle,
     readSolution,
-    inputValue
+    inputValue,
+    getProperty,
+    editProperty
 };

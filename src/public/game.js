@@ -8,6 +8,7 @@ class Game {
         this.width = width;
         this.height = height;
 
+        this.base_puzzle = null;
         this.puzzle = null;
 
         this.status = 0; // Game off = 0, game on = 1
@@ -35,12 +36,6 @@ class Game {
                 } else {
                     this.deselectCells();
                 }
-            } else if (this.status === 0) {
-
-                switch (event.target.id) {
-                    
-                }
-
             }
             
         });
@@ -74,8 +69,18 @@ class Game {
         this.external_ui.style.height = `${this.height / 12}px`;
     }
 
+    clearBoard() {
+        for (const key in this.canvases) {
+            const canvas = this.canvases[key];
+            const ctx = canvas.getContext('2d');
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+    }
+
     closeUI_board() {
-        this.board_ui.style.display = 'none';
+        this.board_ui.hidden = true;
 
         // Clear UI elements
         const board_ui_elements = this.board_ui.querySelectorAll('*');
@@ -88,7 +93,7 @@ class Game {
         
         this.closeUI_board();
 
-        this.board_ui.style.display = '';
+        this.board_ui.hidden = false;
 
         let new_UI_elements = [];
 
@@ -101,10 +106,42 @@ class Game {
 
             game_easy.addEventListener('click', () => {
                 this.startGame(0);
+
+                this.closeUI_board();
             });
 
             new_UI_elements.push(game_easy);
             
+        } else if (this.status === 2) {
+
+            const continue_btn = document.createElement('button');
+            continue_btn.innerText = 'Loss - continue';
+            continue_btn.classList.add('btn');
+
+            continue_btn.addEventListener('click', () => {
+                this.closeUI_board();
+                this.status = 0;
+
+                this.clearBoard();
+                this.initUI_external();
+            });
+
+            new_UI_elements.push(continue_btn);
+        } else if (this.status === 3) {
+
+            const continue_btn = document.createElement('button');
+            continue_btn.innerText = 'Win - continue';
+            continue_btn.classList.add('btn');
+
+            continue_btn.addEventListener('click', () => {
+                this.closeUI_board();
+                this.status = 0;
+
+                this.clearBoard();
+                this.initUI_external();
+            });
+
+            new_UI_elements.push(continue_btn);
         }
 
 
@@ -165,18 +202,7 @@ class Game {
         
     }
 
-    setStatus(setting) {
-        this.status = setting;
-
-        if (this.status === 0) {
-            this.board_ui.style.hidden = false;
-        } else if (this.status === 1) {
-            this.board_ui.style.hidden = true;
-        }
-    }
-
     startGame(difficulty) {
-        this.setStatus(1);
 
         this.closeUI_board();
         this.initUI_external();
@@ -208,6 +234,7 @@ class Game {
                 this.puzzle = JSON.parse(JSON.stringify(data.puzzle));
                 this.base_puzzle = JSON.parse(JSON.stringify(data.puzzle));
                 this.id = data.id;
+                this.status = data.status;
 
                 this.renderBoard();
             })
@@ -222,8 +249,16 @@ class Game {
         return false;
     }
 
-    onLoss() {
+    onFinish() {
+        this.initUI_board();
+        this.initUI_external();
 
+        this.selectedCell = {
+            row: null,
+            col: null
+        };
+        this.puzzle = null;
+        this.base_puzzle = null;
     }
 
     renderBoard() {
@@ -341,6 +376,13 @@ class Game {
                 console.log('Server response:', data);
 
                 this.puzzle = data.puzzle;
+
+                this.status = data.status;
+                if (data.status === 2 || data.status === 3) { // loss or win
+                    this.renderBoard();
+                    this.onFinish();
+                    return;
+                }
                 
                 if (!data.valid) {
                     this.invalidHighlight.push({row: row, col: col});
