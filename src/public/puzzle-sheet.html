@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puzzle Sheet</title>
+
+    <style>
+        .heading {
+            font-family: 'Courier New', Courier, monospace;
+            text-align: center;
+
+            font-size: 36px;
+            font-weight: bold;
+
+            margin: 0;
+        }
+        .description {
+            font-family: 'Courier New', Courier, monospace;
+            text-align: center;
+
+            font-size: 16px;
+        }
+
+        body {
+            margin: 0;
+            padding: 0.25in;
+
+            width: 8.5in;
+
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+
+            flex-direction: column;   
+        }
+
+        .canvas_container {
+            display: flex;
+            flex-wrap: wrap;
+
+            justify-content: center;
+        }
+
+        canvas {
+            width: 3in;
+            height: 3in;
+            margin: 0.125in;
+        }
+
+        @page { /* when printing */
+            margin-top: 0.75in;
+        }
+
+    </style>
+</head>
+<body>
+    <h1 class="heading"></h1>
+    <p class="description"></p>
+
+    <div class="canvas_container"></div>
+
+    <script>
+
+        const difficulty = parseInt(prompt('Difficulty (0 = easy, 1 = medium, 2 = hard, 3 = very hard)'));
+        const quantity = parseInt(prompt('Quantity (minumum = 1, maximum = 24)'));
+        
+        if (
+            (difficulty >= 0 && difficulty <= 3) &&    
+            (quantity >= 1 && quantity <= 24)
+        ) {
+            drawSheet(difficulty, quantity);
+            //window.print();
+        }
+        
+
+        async function drawSheet(difficulty, quantity) {
+            const difficulty_label = (() => {
+                switch (difficulty) {
+                    case 0:
+                        return 'Easy';
+                    case 1:
+                        return 'Medium';
+                    case 2:
+                        return 'Hard';
+                    case 3:
+                        return 'Very Hard';
+                }
+            })();
+
+            document.querySelector('.heading').innerText = "Sudoku Puzzles";
+            document.querySelector('.description').innerText = `Difficulty: ${difficulty_label}`;
+
+            //Create canvases
+            const canvas_container = document.querySelector('.canvas_container');            
+            
+            for (let i = 0; i < quantity; i++) {
+                const canvas = document.createElement('canvas');
+                canvas_container.append(canvas);
+            }
+
+            // Get games and render board
+            const canvases = document.querySelectorAll('canvas');
+
+            let puzzles = [];
+            for (const canvas of canvases) {
+                const puzzle = await getGame(difficulty);
+
+                if (puzzle) {
+                    puzzles.push(puzzle);
+                } else {
+                    console.warn('Puzzle not recieved')
+                }
+            }
+
+            for (let i = 0; i < puzzles.length; i++) {
+                const canvas = canvases[i];
+                canvas.width = 600;
+                canvas.height = 600;
+                
+                renderBoard(canvas, puzzles[i]);
+
+            }
+
+        }
+
+    async function getGame(difficulty) {
+        try {
+            const response = await fetch('api/games', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ difficulty: difficulty })
+            });
+
+            if (!response.ok) throw new Error('Network response was not ok');
+
+            const data = await response.json();
+
+            console.log(data);
+
+            return data.puzzle;
+        } catch (error) {
+            console.error('Fetch error:', error);
+            return null;
+        }
+    }
+
+
+        function renderBoard(board, puzzle) {
+            if (!puzzle) return;
+
+            const board_ctx = board.getContext('2d');
+
+            const width = board.width;
+            const height = board.height;
+
+            const cell_width = width / 9;
+            const cell_height = height / 9;
+
+            // Clear canvas
+            board_ctx.clearRect(0, 0, width, height);
+
+            // Draw cells
+            board_ctx.font = `${cell_height * 0.6}px Times New Roman`;
+            board_ctx.textAlign = "center";
+            board_ctx.textBaseline = "middle";
+
+            for (let row = 0; row < 9; row++) {
+                for (let col = 0; col < 9; col++) {
+                    const value = puzzle[row][col];
+
+                    // Draw number if not zero
+                    if (value !== 0) {
+                        board_ctx.fillStyle = "black";
+                        
+                        const fontSize_cell = Math.floor((width / 9) * 0.7);
+                        board_ctx.font = `${fontSize_cell}px "Times New Roman"`;
+
+                        const x = col * cell_width + cell_width / 2;
+                        const y = row * cell_height + cell_height / 2;
+
+                        board_ctx.fillText(value, x, y);
+                    }
+
+                    // Draw cell border
+                    board_ctx.strokeStyle = "lightgrey";                
+                    board_ctx.lineWidth = 1;
+                    board_ctx.strokeRect(col * cell_width, row * cell_height, cell_width, cell_height);
+                }
+            }
+
+            // Draw thicker grid lines for 3x3 boxes
+            board_ctx.strokeStyle = "black";
+            board_ctx.lineWidth = 2;
+            for (let i = 0; i <= 9; i++) {
+                if (i % 3 === 0) {
+                    // Vertical thick lines
+                    board_ctx.beginPath();
+                    board_ctx.moveTo(i * cell_width, 0);
+                    board_ctx.lineTo(i * cell_width, height);
+                    board_ctx.stroke();
+
+                    // Horizontal thick lines
+                    board_ctx.beginPath();
+                    board_ctx.moveTo(0, i * cell_height);
+                    board_ctx.lineTo(width, i * cell_height);
+                    board_ctx.stroke();
+                }
+            }
+        }
+    </script>
+</body>
+</html>
