@@ -6,6 +6,9 @@ const util_generateSudoku = require('../utils/util_generateSudoku');
 
 function createGame(req, res) {
     const difficulty = req.body.difficulty;
+
+    if (typeof difficulty !== 'number') return res.status(200).json( {message: 'Difficulty not defined properly'} );
+    if (difficulty < 0 || difficulty > 3) return res.status(200).json( {message: 'Difficulty not defined properly'} );;
     
     const id = model_games_info.getProperty('nextGameID');
 
