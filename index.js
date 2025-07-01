@@ -8,7 +8,10 @@ app.use(express.static(path.join(__dirname, 'src/public')));
 
 app.use(express.json()); //Middleware so api requests are in json
 
-
+//No router needed --- simple req
+app.get('/puzzle-sheet', (req, res) => {
+    res.redirect('/puzzle-sheet.html');
+});
 
 //Set up routes
 const router_game = require('./src/routes/router_game');
