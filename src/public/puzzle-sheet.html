@@ -117,6 +117,15 @@
                 const canvas = canvases[i];
                 canvas.width = 600;
                 canvas.height = 600;
+
+                if (quantity === 1) {
+                    canvas.style.width = '6in';
+                    canvas.style.height = '6in';
+                }
+                if (quantity === 2) {
+                    canvas.style.width = '4.5in';
+                    canvas.style.height = '4.5in';
+                }
                 
                 renderBoard(canvas, puzzles[i]);
 
