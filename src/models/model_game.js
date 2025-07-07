@@ -24,7 +24,7 @@ function createGame_callback(game, callback) {
     });
 }
 
-async function createGame(game) {
+function createGame(game) { // don't need async bc. a promise is explicitly returned
     return new Promise((resolve, reject) => {            
 
         const values = [
