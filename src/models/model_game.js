@@ -1,77 +1,153 @@
-const fs = require('fs');
-const path = require('path');
+const db = require('../db_utils/db_util_game.js');
 
-const filePath = path.join(__dirname, '../data/games.json');
+// For string storage in SQL
+const serialise = (data) => JSON.stringify(data);
+const deserialise = (data) => JSON.parse(data);
 
-function readGames() {
-    const jsonData = fs.readFileSync(filePath, 'utf-8'); // returns string
-    return JSON.parse(jsonData); // convert string into JSON
+
+function createGame_callback(game, callback) {
+    const values = [
+        serialise(game.base_puzzle),
+        serialise(game.puzzle),
+        serialise(game.solution),
+        game.errors,
+        game.status
+    ];
+
+    const sql = `INSERT INTO games (base_puzzle, puzzle, solution, errors, status) VALUES (?, ?, ?, ?, ?)`;
+
+    db.query(sql, values, (err, result) => {
+        if (err) return callback(err);
+
+        game.id = result.insertId;
+        callback(null, game);
+    });
 }
 
-function writeGames(games) {
-    fs.writeFileSync(filePath, JSON.stringify(games, null, 4)); // third arg sets indentation
-}
+async function createGame(game) {
+    return new Promise((resolve, reject) => {            
 
-function getProperty(id, property) {
-    const games = readGames();
+        const values = [
+            serialise(game.base_puzzle),
+            serialise(game.puzzle),
+            serialise(game.solution),
+            game.errors,
+            game.status
+        ];
 
-    const property_value = games[id][property];
+        const sql = `INSERT INTO games (base_puzzle, puzzle, solution, errors, status) VALUES (?, ?, ?, ?, ?)`;
 
-    return property_value;
-}
+        db.query(sql, values, (err, result) => {
+            if (err) return reject(err);
 
-function editProperty(id, property, value) {
-    const games = readGames();
 
-    games[id][property] = value;
+            console.log('RS');
+            console.log(result)
+            try {
+                game.id = result.insertId; // insertID = game id in the SQL DB 
 
-    writeGames(games);
-}
+                resolve(game);
+            } catch (err) {
+                reject(err);
+            }
+        });
 
-function inputValue(id, row, col, value) {
-    const games = readGames();
-
-    games[id].puzzle[row][col] = value;
-
-    writeGames(games);
-}
-
-function createGame(game) { // ADD DATA PARAMS LATER
-    let games = readGames();
-        
-    games.push(game);
-    
-    writeGames(games);
-}
-
-function deleteGame(id) {
-    let games = readGames();
-
-    for (let i = 0; i < games.length; i++) {
-        const game = games[i];
-
-        const gameID = game.id;
-
-        if (gameID === id) {
-            games.splice(id, 1);
-        }
-    }
-
-    writeGames(games);
+    });
 }
 
 function readPuzzle(id) {
-    return readGames()[id].puzzle;
+    return new Promise((resolve, reject) => {
+        const sql = 'SELECT puzzle FROM games WHERE id = ?';
+
+        db.query(sql, [id], (err, result) => { // results = [{ puzzle: '[[...],[...]]' }]
+            if (err) return reject(err);
+            if (!result.length) return reject('game not found');
+
+            try {
+                const puzzle = deserialise(result[0].puzzle);
+                resolve(puzzle);
+            } catch (err) {
+                reject(err);
+            }
+
+        });
+
+    });
 }
 
 function readSolution(id) {
-    return readGames()[id].solution;
+    return new Promise((resolve, reject) => {
+        const sql = 'SELECT solution FROM games WHERE id = ?';
+
+        db.query(sql, [id], (err, result) => {
+            if (err) return reject(err);
+            if (!result.length) return reject('solution not found');
+
+            try {
+                const solution = deserialise(result[0].solution);
+                resolve(solution);
+            } catch (err) {
+                reject(err);
+            }
+
+        });
+
+    });
+}
+
+function getProperty(id, property) {
+    return new Promise((resolve, reject) => {
+        const sql = `SELECT \`${property}\` FROM games WHERE id = ?`;
+
+        db.query(sql, [id], (err, result) => {
+            if (err) return reject(err);
+            if (!result.length) return reject('property not found');
+
+            try {
+                const property_value = deserialise(result[0][property]);
+                resolve(property_value);
+            } catch (err) {
+                reject(err);
+            }
+
+        });
+
+    });
+}
+
+function editProperty(id, property, value) {
+    return new Promise((resolve, reject) => {
+        const sql = `UPDATE games SET \`${property}\` = ? WHERE id = ?`;
+
+        db.query(sql, [serialise(value), id], (err) => {
+            if (err) return reject(err);
+            resolve();
+        });
+    });
+}
+
+
+async function inputValue(id, row, col, input) {
+    const puzzle = await readPuzzle(id);
+
+    puzzle[row][col] = input;
+
+    await editProperty(id, 'puzzle', puzzle);
+}
+
+function deleteGame(id) {
+    return new Promise((resolve, reject) => {
+        const sql = `DELETE FROM games WHERE id = ?`;
+
+        db.query(sql, [id], (err) => {
+            if (err) return reject(err);
+            resolve();
+        });
+    });
 }
 
 // Export functions
 module.exports = {
-    readGames,
-    writeGames,
     createGame,
     deleteGame,
     readPuzzle,
