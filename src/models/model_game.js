@@ -40,9 +40,6 @@ async function createGame(game) {
         db.query(sql, values, (err, result) => {
             if (err) return reject(err);
 
-
-            console.log('RS');
-            console.log(result)
             try {
                 game.id = result.insertId; // insertID = game id in the SQL DB 
 
