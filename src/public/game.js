@@ -377,6 +377,8 @@ class Game {
                 this.base_puzzle = JSON.parse(JSON.stringify(data.puzzle));
                 this.id = data.id;
 
+                this.status = data.status;
+
                 this.renderBoard();
             })
             .catch(error => {
@@ -404,6 +406,7 @@ class Game {
         this.base_puzzle = null;
 
         this.errors = 0;
+        this.reqPending = false;
     }
 
     renderBoard() {
