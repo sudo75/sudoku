@@ -4,7 +4,7 @@ const mysql = require('mysql2');
 const fs = require('fs');
 const path = require('path');
 
-const schemaPath = path.join(__dirname, 'schema.sql');
+const schemaPath = path.join(__dirname, '..', 'schemas', 'game_schema.sql');
 const schema = fs.readFileSync(schemaPath, 'utf8');
 
 // Connect without selecting a database
