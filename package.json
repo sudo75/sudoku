@@ -7,8 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "setup_db": "node src/data/db_setup.js",
-    "clear_db": "node src/data/clear_db.js"
+    "setup_db": "node src/db/init.js",
+    "clear_db": "node src/db/reset.js"
   },
   "dependencies": {
     "dotenv": "^17.0.1",

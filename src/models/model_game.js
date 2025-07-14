@@ -1,4 +1,4 @@
-const db = require('../db_utils/db_util_game.js');
+const db = require('../db/connection.js');
 
 // For string storage in SQL
 const serialise = (data) => JSON.stringify(data);
