@@ -13,9 +13,17 @@ app.get('/puzzle-sheet', (req, res) => {
     res.redirect('/puzzle-sheet.html');
 });
 
+app.get('/account', (req, res) => {
+    res.redirect('/account/account.html');
+});
+
 //Set up routes
 const router_game = require('./src/routes/router_game');
 app.use('/api/games', router_game);
+
+const router_users = require('./src/routes/router_users');
+app.use('/api/users', router_users);
+
 
 // Not found
 app.use((req, res) => {

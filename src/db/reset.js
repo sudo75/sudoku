@@ -16,9 +16,15 @@ connection.connect(err => {
         if (err) {
             throw err;
         }
-        console.log('Database cleared and games table cleared successfully.');
-        
-        connection.end();
+        console.log('Games table cleared successfully.');
     });
 
+    connection.query('DROP TABLE IF EXISTS users', (err, results) => {
+        if (err) {
+            throw err;
+        }
+        console.log('Users table cleared successfully.');
+    });
+
+    connection.end();
 });

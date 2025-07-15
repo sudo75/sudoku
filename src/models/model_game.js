@@ -143,6 +143,10 @@ function deleteGame(id) {
     });
 }
 
+function getGamesByUser(user_id) {
+
+}
+
 // Export functions
 module.exports = {
     createGame,

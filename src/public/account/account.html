@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+</head>
+<body>
+    <button class="login">Login</button>
+    <button class="create_account">Create Account</button>
+
+    <script>
+        const loginBtn = document.querySelector('.login');
+        const create_accountBtn = document.querySelector('.create_account');
+
+        create_accountBtn.addEventListener('click', () => {
+            const username = prompt('Select Username');
+            if (!username) return;
+
+            const password = prompt('Select Password');
+
+            
+        });
+    </script>
+</body>
+</html>

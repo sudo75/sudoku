@@ -4,9 +4,6 @@ const mysql = require('mysql2');
 const fs = require('fs');
 const path = require('path');
 
-const schemaPath = path.join(__dirname, '..', 'schemas', 'game_schema.sql');
-const schema = fs.readFileSync(schemaPath, 'utf8');
-
 // Connect without selecting a database
 const connection = mysql.createConnection({
     host: process.env.DB_HOST,
@@ -16,13 +13,14 @@ const connection = mysql.createConnection({
 });
 
 
-connection.connect(err => {
-    if (err) throw err;
-    console.log('Ensuring DB existance...');
+// INITIALISE THE DATABASE
+connection.query(fs.readFileSync(path.join(__dirname, '..', 'schemas', 'init.sql'), 'utf8'));
 
-    connection.query(schema, (err, results) => { // Create DB -- the first querry param will take SQL code or a file with SLQ code
-        if (err) throw err;
-        console.log('Database and tables created (if not already exist).');
-        connection.end();
-    });
-});
+// Query the USER SCHEMA
+connection.query(fs.readFileSync(path.join(__dirname, '..', 'schemas', 'user_schema.sql'), 'utf8'));
+
+// Query the GAME SCHEMA
+connection.query(fs.readFileSync(path.join(__dirname, '..', 'schemas', 'game_schema.sql'), 'utf8'));
+
+// Finish connection
+connection.end();
