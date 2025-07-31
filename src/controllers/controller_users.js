@@ -23,7 +23,7 @@ async function login(req, res) {
     })();
 
     try {
-        await model_users.login(username, password, sessionToken);
+        await model_users.login(username, password, sessionToken); // if the promise is rejected, it throws an error which is caught by the catch block
 
         // Username (logged-in account) cookie
         res.cookie('username', username, {
