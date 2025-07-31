@@ -17,9 +17,17 @@ app.get('/account', (req, res) => {
     res.redirect('/account/account.html');
 });
 
+
+// Required for pasrsing cookies -- put before route definitions
+const cookieParser = require('cookie-parser');
+app.use(cookieParser());
+
+// Auth middleware
+const verify_session = require('./src/middleware/verify_session.js');
+
 //Set up routes
 const router_game = require('./src/routes/router_game');
-app.use('/api/games', router_game);
+app.use('/api/games', verify_session, router_game); // use session verification for every api/games route
 
 const router_users = require('./src/routes/router_users');
 app.use('/api/users', router_users);

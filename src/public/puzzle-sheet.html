@@ -133,7 +133,24 @@
 
         }
 
+    async function isLoggedIn() {
+        const options = {
+            method: 'GET',
+            credentials: 'include', // *Needed for cookies to be sent*
+            headers: {
+                'Content-Type': 'application/json'
+            }
+            // no body for GET requests
+        }
+        return fetch('api/users/session', options)
+        .then(response => {
+            return response.ok;
+        });
+    }
+
     async function getGame(difficulty) {
+        if (await !isLoggedIn()) return window.location = './account/account.html';
+
         try {
             const response = await fetch('api/games', {
                 method: 'POST',

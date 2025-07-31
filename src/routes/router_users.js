@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const verifySession = require('../middleware/verify_session.js');
 
 //Define controllers
 const controller_users = require('../controllers/controller_users');
@@ -8,7 +9,14 @@ const controller_users = require('../controllers/controller_users');
 router.post('/create_account', controller_users.createAccount);
 
 // Route: POST /api/users - Login
-//router.post('/login', controller_users.login);
+router.post('/login', controller_users.login);
+
+// To check login status
+router.get('/session', verifySession, (req, res) => {
+    res.json({
+        loggedIn: true
+    });
+});
 
 
 module.exports = router;

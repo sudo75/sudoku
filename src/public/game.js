@@ -351,9 +351,35 @@ class Game {
         this.getGame(difficulty);
     }
 
+    async isLoggedIn() {
+        const options = {
+            method: 'GET',
+            credentials: 'include', // *Needed for cookies to be sent*
+            headers: {
+                'Content-Type': 'application/json'
+            }
+            // no body for GET requests
+        }
+        try {
+            const response = await fetch('api/users/session', options);
+            return response.ok;
+
+        } catch (err) {
+            console.error(err);
+            return false;
+        }
+    }
+
     async getGame(difficulty) {
+
+        if (!(await this.isLoggedIn())) {
+            window.location = './account/account.html';
+            return;
+        }
+
         const options = {
             method: 'POST',
+            credentials: 'include', // *Needed for cookies to be sent*
             headers: {
                 'Content-Type': 'application/json'
             },

@@ -1,4 +1,5 @@
 const db = require('../db/connection.js');
+const { getUserIdByUsername } = require('./model_users.js');
 
 // For string storage in SQL
 const serialise = (data) => JSON.stringify(data);
@@ -24,10 +25,11 @@ function createGame_callback(game, callback) {
     });
 }
 
-function createGame(game) { // don't need async bc. a promise is explicitly returned
-    return new Promise((resolve, reject) => {            
+function createGame(game, username) { // don't need async bc. a promise is explicitly returned
+    return new Promise(async(resolve, reject) => {
 
         const values = [
+            await getUserIdByUsername(username),
             serialise(game.base_puzzle),
             serialise(game.puzzle),
             serialise(game.solution),
@@ -35,7 +37,7 @@ function createGame(game) { // don't need async bc. a promise is explicitly retu
             game.status
         ];
 
-        const sql = `INSERT INTO games (base_puzzle, puzzle, solution, errors, status) VALUES (?, ?, ?, ?, ?)`;
+        const sql = `INSERT INTO games (user_id, base_puzzle, puzzle, solution, errors, status) VALUES (?, ?, ?, ?, ?, ?)`;
 
         db.query(sql, values, (err, result) => {
             if (err) return reject(err);

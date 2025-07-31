@@ -18,8 +18,50 @@
             if (!username) return;
 
             const password = prompt('Select Password');
+            if (!password) return;
 
-            
+            fetch('/api/users/create_account', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password: password
+                })
+            })
+            .then(data => {
+                console.log('Server response:', data);
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+            });
+        });
+
+        loginBtn.addEventListener('click', () => {
+            const username = prompt('Select Username');
+            if (!username) return;
+
+            const password = prompt('Select Password');
+            if (!password) return;
+
+            fetch('/api/users/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password: password
+                })
+            })
+            .then(data => {
+                console.log('Server response:', data);
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+            });
+
         });
     </script>
 </body>

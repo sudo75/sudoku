@@ -4,11 +4,12 @@ const util_generateSudoku = require('../utils/util_generateSudoku');
 
 
 async function createGame(req, res) {
-    const difficulty = req.body.difficulty;
+    const { difficulty } = req.body;
 
     if (typeof difficulty !== 'number') return res.status(200).json( {message: 'Difficulty not defined properly'} );
-    if (difficulty < 0 || difficulty > 3) return res.status(200).json( {message: 'Difficulty not defined properly'} );;
+    if (difficulty < 0 || difficulty > 3) return res.status(200).json( {message: 'Difficulty not defined properly'} );
     
+    const { username, session_token } = req.cookies;
 
     const sudoku = util_generateSudoku.generateSudoku(difficulty);
     
@@ -20,7 +21,7 @@ async function createGame(req, res) {
         status: 1 // 0 = not started, 1 = playing, 2 = lost, 3 = win
     };
 
-    const created_game = await model_game.createGame(game);
+    const created_game = await model_game.createGame(game, username);
     res.status(201).json({ message: 'Game created successfully', puzzle: created_game.puzzle, id: created_game.id, status: created_game.status });
 
 }
