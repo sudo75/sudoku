@@ -41,7 +41,9 @@ function login(username, password, sessionToken) {
         db.query(sql, [username], (err, rows) => {
             if (err) return reject(err);
 
-            if (rows[0].password !== password) reject(new Error('Incorrect username/password'));
+            if (rows.length === 0) return reject(new Error('Incorrect username'));
+
+            if (rows[0].password !== password) return reject(new Error('Incorrect password'));
 
             const tokenSql =`UPDATE users SET session_token = ?, session_created_at = ? WHERE username = ?`;
 
