@@ -25,5 +25,13 @@
     
 
     <script type="module" src="./main.js"></script>
+    <script>
+        function closeAccountMenu() {
+            const iframe = document.querySelector('.account_menu');
+            if (iframe && iframe.parentNode) {
+                iframe.parentNode.removeChild(iframe);
+            }
+        }
+    </script>
 </body>
 </html>

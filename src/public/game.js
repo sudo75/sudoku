@@ -82,7 +82,7 @@ class Game {
 
     }
 
-    initBoard() {
+    async initBoard() {
         for (const key in this.canvases) {
             const canvas = this.canvases[key];
 
@@ -107,6 +107,9 @@ class Game {
         this.label.style.width = `${this.width}px`;
         this.label.style.height = `${this.height / 9}px`;
 
+        if (!(await this.isLoggedIn())) {
+            this.account_menu.open();
+        }
     }
 
     initLabel() {
@@ -370,12 +373,36 @@ class Game {
         }
     }
 
-    async getGame(difficulty) {
+    account_menu = {
+        open: () => { // use arrow functions to preserve 'this'
+            const account_menu = document.createElement('iframe');
+            account_menu.src = './account/account.html';
+            account_menu.style.position = 'absolute';
 
-        if (!(await this.isLoggedIn())) {
-            window.location = './account/account.html';
-            return;
+            const marginW = this.width * 0.1;
+            const marginH = this.height * 0.1;
+            account_menu.style.top = `${marginH}px`;
+            account_menu.style.left = `${marginW}px`;
+            account_menu.style.boxSizing = 'border-box';
+
+            account_menu.style.zIndex = 2;
+
+            account_menu.style.width = `${this.width - marginW * 2}px`;
+            account_menu.style.height = `${this.height - marginH * 2}px`;
+
+            account_menu.classList.add('account_menu');
+
+            const container_game = document.querySelector('.game');
+            container_game.append(account_menu);
+        },
+
+        close: () => {
+            const account_menu = document.querySelector('.account_menu');
+            account_menu.parentNode.removeChild(account_menu);
         }
+    }
+
+    async getGame(difficulty) {
 
         const options = {
             method: 'POST',
@@ -390,6 +417,10 @@ class Game {
 
         fetch('api/games', options) // include options to set values (ex. method will default to GET, otherwise)
             .then(response => {
+                if (response.status === 401) { // unauthorised
+                    this.account_menu.open();
+                }
+
                 if (!response.ok) throw new Error('Network response was not ok');
                 
                 const data = response.json(); // Promise
@@ -601,6 +632,10 @@ class Game {
             body: JSON.stringify({ row: row, col: col, input: number })
         })
             .then(response => {
+                if (response.status === 401) { // unauthorised
+                    this.account_menu.open();
+                }
+                
                 if (!response.ok) throw new Error('Network response was not ok');
                 
                 const data = response.json(); // Promise

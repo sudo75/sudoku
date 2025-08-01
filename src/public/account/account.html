@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
+
+    <link rel="stylesheet" href="./account.css">
 </head>
 <body>
     <button class="login">Login</button>
@@ -55,8 +57,14 @@
                     password: password
                 })
             })
+            .then(response => {
+                if (response.ok) parent.closeAccountMenu();
+                const data = response.json();
+
+                return data;
+            })
             .then(data => {
-                console.log('Server response:', data);
+                console.log(data);
             })
             .catch(error => {
                 console.error('Fetch error:', error);

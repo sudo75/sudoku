@@ -31,3 +31,7 @@ const boardDimension = minDimension;
 // Define game
 
 const game = new Game(game_container, canvases, label, board_ui, external_ui1, external_ui2, boardDimension, boardDimension);
+
+function closeAccountMenu() {
+    game.account_menu.close();
+}
